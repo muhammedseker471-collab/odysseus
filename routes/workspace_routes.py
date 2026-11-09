@@ -1,4 +1,4 @@
-"""Workspace API - browse server directories and inventory app routes."""
+"""Workspace directory browser plus separately mounted inventory routes."""
 import os
 from fastapi import APIRouter, Request, HTTPException, Query
 from fastapi.responses import RedirectResponse
@@ -11,20 +11,20 @@ _MAX_BROWSE_DIRS = 500
 
 
 def setup_workspace_routes():
-    router = APIRouter(prefix="/api/workspace", tags=["workspace"])
+    # Keep inventory's /api/inventory paths independent of this workspace API prefix.
+    router = APIRouter(tags=["workspace"])
     router.include_router(inventory_router)
 
     @router.get("/inventory")
     def inventory_page(request: Request):
-        # Same auth middleware as the rest of the app protects this deep link.
+        # Auth middleware protects this route; page data APIs are owner-scoped too.
         if not get_current_user(request):
             from src.auth_helpers import require_user
             require_user(request)
         return RedirectResponse(url="/static/inventory.html", status_code=302)
 
-    @router.get("/browse")
+    @router.get("/api/workspace/browse")
     def browse(request: Request, path: str = Query(default="")):
-        """List subdirectories of `path` so the UI can navigate the server filesystem."""
         owner = get_current_user(request)
         if not owner_is_admin_or_single_user(owner):
             raise HTTPException(status_code=403, detail="Workspace browsing is admin-only")
@@ -49,9 +49,8 @@ def setup_workspace_routes():
                 "dirs": dirs_sorted[:_MAX_BROWSE_DIRS], "truncated": len(dirs_sorted) > _MAX_BROWSE_DIRS,
                 "selectable": vet_workspace(target) is not None}
 
-    @router.get("/vet")
+    @router.get("/api/workspace/vet")
     def vet(request: Request, path: str = Query(default="")):
-        """Validate a workspace path without binding it."""
         owner = get_current_user(request)
         if not owner_is_admin_or_single_user(owner):
             raise HTTPException(status_code=403, detail="Workspace selection is admin-only")

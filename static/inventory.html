@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#101510"><title>Stok & Sipariş Takibi</title>
+  <link rel="stylesheet" href="/static/inventory.css">
+</head>
+<body>
+  <div class="shell">
+    <aside class="sidebar">
+      <a class="brand" href="/"><span class="brand-mark">S</span><span>STOK<span class="brand-light">PUSULA</span></span></a>
+      <div class="side-label">ÇALIŞMA ALANI</div>
+      <button class="nav active" data-view="overview"><span>▦</span> Genel Bakış</button>
+      <button class="nav" data-view="products"><span>◫</span> Ürün & Stok</button>
+      <button class="nav" data-view="orders"><span>▤</span> Siparişler</button>
+      <button class="nav" data-view="channels"><span>⇄</span> Satış Kanalları</button>
+      <div class="side-bottom"><div class="status-dot"></div><span>Verileriniz hesabınızda saklanır</span></div>
+    </aside>
+    <main class="main">
+      <header class="topbar"><div><div class="eyebrow" id="today-label">STOK YÖNETİMİ</div><h1 id="page-title">Genel Bakış</h1></div><div class="top-actions"><button class="btn ghost" id="refresh">↻ <span>Yenile</span></button><button class="btn primary" id="add-product-top">＋ Yeni ürün</button></div></header>
+      <div id="notice" class="notice" role="status"></div>
+      <section id="view-overview" class="view">
+        <div class="welcome"><div><div class="eyebrow pale">BUGÜNÜN ÖZETİ</div><h2>Stoklarını kontrol altında tut.</h2><p>Ürünleri ve siparişleri tek yerden takip et. Stok azaldığında burada uyarı görürsün.</p></div><div class="welcome-icon">▥</div></div>
+        <div class="stats-grid">
+          <article class="stat-card"><div class="stat-top"><span>Kayıtlı ürün</span><span class="stat-icon">◫</span></div><strong id="stat-products">—</strong><small>ürün çeşidi</small></article>
+          <article class="stat-card"><div class="stat-top"><span>Toplam stok</span><span class="stat-icon">▦</span></div><strong id="stat-stock">—</strong><small>depodaki adet</small></article>
+          <article class="stat-card"><div class="stat-top"><span>Son 7 gün satış</span><span class="stat-icon">↗</span></div><strong id="stat-sold">—</strong><small>satılan ürün adedi</small></article>
+          <article class="stat-card warning-card"><div class="stat-top"><span>Kritik stok</span><span class="stat-icon">!</span></div><strong id="stat-low">—</strong><small>yenileme eşiğinde</small></article>
+        </div>
+        <div class="content-grid"><article class="panel sales-panel"><div class="panel-heading"><div><div class="eyebrow">SATIŞ HAREKETİ</div><h3>Günlük satış</h3></div><span class="period-pill">Son 7 gün</span></div><div id="sales-chart" class="chart"></div><div class="chart-labels" id="chart-labels"></div></article>
+          <article class="panel"><div class="panel-heading"><div><div class="eyebrow">AKSİYON GEREKİYOR</div><h3>Stok uyarıları</h3></div><span class="count-pill" id="low-badge">0</span></div><div id="low-list" class="low-list"></div></article></div>
+        <article class="panel channels-panel"><div class="panel-heading"><div><div class="eyebrow">ÇOKLU KANAL</div><h3>Satış kanalları</h3></div><button class="text-btn" data-go="channels">Tümünü gör →</button></div><div class="channel-strip" id="channel-strip"></div></article>
+      </section>
+      <section id="view-products" class="view hidden"><div class="toolbar"><div><h2>Ürün & Stok</h2><p>SKU bazında miktarları ve yenileme eşiklerini yönet.</p></div><div class="toolbar-actions"><input id="product-search" class="search" placeholder="Ürün veya SKU ara…"><button class="btn primary" id="add-product">＋ Ürün ekle</button></div></div><div class="panel table-wrap"><table><thead><tr><th>ÜRÜN</th><th>SKU</th><th>MEVCUT STOK</th><th>UYARI EŞİĞİ</th><th>BİRİM FİYAT</th><th></th></tr></thead><tbody id="products-table"></tbody></table><div id="products-empty" class="empty hidden">Henüz ürün eklenmemiş. İlk ürününü ekleyerek başla.</div></div></section>
+      <section id="view-orders" class="view hidden"><div class="toolbar"><div><h2>Siparişler</h2><p>Manuel sipariş ekle veya satış kanallarından CSV aktar.</p></div><div class="toolbar-actions"><button class="btn ghost" id="import-csv">⇧ CSV aktar</button><button class="btn primary" id="add-order">＋ Sipariş ekle</button><input id="csv-file" type="file" accept=".csv,text/csv" hidden></div></div><div class="hint-box"><b>CSV biçimi:</b> <code>external_order_id,channel,sku,quantity,status</code> — başlık satırı zorunlu. Aynı kanal ve sipariş numarası tekrar içe aktarılmaz.</div><div class="panel table-wrap"><table><thead><tr><th>SİPARİŞ</th><th>KANAL</th><th>ÜRÜN</th><th>ADET</th><th>DURUM</th><th>TARİH</th></tr></thead><tbody id="orders-table"></tbody></table><div id="orders-empty" class="empty hidden">Henüz sipariş yok. Manuel ekle veya CSV aktar.</div></div></section>
+      <section id="view-channels" class="view hidden"><div class="toolbar"><div><h2>Satış kanalları</h2><p>10 kanal için siparişleri CSV ile içe aktar. Doğrudan API bağlantıları mağaza erişim bilgileri ve kanal onayları gerektirir.</p></div><button class="btn ghost" data-go="orders">CSV sipariş aktar →</button></div><div class="channel-grid" id="channel-grid"></div><div class="hint-box info"><b>Şeffaflık:</b> Bu ilk sürümde kanallar otomatik bağlanmış değildir. Resmî API erişimi olmayan bir entegrasyon bağlı gibi gösterilmez. Her kanalın resmî API/mağaza yetkisi sağlandıkça gerçek senkronizasyon eklenebilir.</div></section>
+    </main>
+  </div>
+  <dialog id="modal"><form id="modal-form" method="dialog"><div class="modal-head"><div><div class="eyebrow" id="modal-eyebrow">YENİ KAYIT</div><h2 id="modal-title">Ürün ekle</h2></div><button type="button" class="close" id="modal-close">×</button></div><div id="modal-fields"></div><div class="modal-actions"><button type="button" class="btn ghost" id="modal-cancel">Vazgeç</button><button type="submit" class="btn primary">Kaydet</button></div></form></dialog>
+  <script type="module" src="/static/inventory.js"></script>
+</body>
+</html>
